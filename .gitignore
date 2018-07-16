@@ -1,5 +1,6 @@
 ##YeGirl images##
 *.JPG
+node_modules/
 ##ignore this file##
 .classpath
 .project
