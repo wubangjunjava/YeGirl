@@ -13,8 +13,8 @@
  *   http://www.gnu.org/licenses/gpl.html
  */
 
-;(function($) {
-    $.fn.fixPNG = function() {
+; (function ($) {
+    $.fn.fixPNG = function () {
         return this.each(function () {
             var image = $(this).css('backgroundImage');
 
@@ -32,23 +32,23 @@
         });
     };
 
-    var elem, opts, preloader, orig_pos, final_pos, busy = false, nr, zindex = 90, titleh = 0, shadow = 20, margin = 20, fx = $.extend($('<div/>')[0], { prop: 0 });
+    var elem, opts, preloader, orig_pos, final_pos, busy = false, nr, zindex = 90, titleh = 0, shadow = 20, margin = 20, rotateZ = -180, timer1, fx = $.extend($('<div/>')[0], { prop: 0 });
 
-    $.fn.imgbox = function(settings) {
-        return this.unbind('click.pb').bind('click.pb', function() {
-            $.imgbox( $(this), settings );
+    $.fn.imgbox = function (settings) {
+        return this.unbind('click.pb').bind('click.pb', function () {
+            $.imgbox($(this), settings);
             return false;
         });
     };
 
-    $.imgbox = function(e, o) {
+    $.imgbox = function (e, o) {
         if (busy) {
             return false;
         }
 
-        elem    = e;
-        opts    = $.extend({}, $.fn.imgbox.defaults, o);
-        nr      = jQuery.data(elem[0]);
+        elem = e;
+        opts = $.extend({}, $.fn.imgbox.defaults, o);
+        nr = jQuery.data(elem[0]);
 
         if ($('#imgbox-wrap-' + nr).length) {
             zoomOut();
@@ -61,21 +61,48 @@
             $('#imgbox-overlay')
                 .unbind().stop().hide()
                 .css({
-                    'height'    : $(document).height(),
-                    'opacity'   : opts.overlayOpacity
+                    'height': $(document).height(),
+                    'opacity': opts.overlayOpacity
                 })
                 .show();
         }
 
-        preloader = new Image;
+        preloader = new Image();
         preloader.src = $(elem).attr('href');
 
-        if (preloader.complete == false) {
+        if (preloader.complete === false) {
             showActivity();
 
-            $(preloader).unbind().one('load', function() {
-                hideActivity();
-                zoomIn();
+            var leftObj = $('#imgbox-loading .ld-left div')[0];
+            var rightObj = $('#imgbox-loading .ld-right div')[0];
+            timer1 = setInterval(function () {
+                rotateZ += 30;
+
+                if (rotateZ > 0) {
+                    rotateZ = -180;
+                    clearInterval(timer1);
+                    setTimeout(function () {
+                        leftObj.style.transform = 'rotateZ(-60deg)';
+                    }, 2000);
+                    return false;
+                }
+
+                rightObj.style.transform = 'rotateZ(' + rotateZ + 'deg)';
+            }, 1000);
+
+            $(preloader).unbind().one('load', function () {
+                rotateZ = -180;
+                clearInterval(timer1);
+                rightObj.style.transform = 'rotateZ(0deg)';
+
+                setTimeout(function () {
+                    leftObj.style.transform = 'rotateZ(0deg)';
+                }, 2000);
+
+                setTimeout(function () {
+                    hideActivity();
+                    zoomIn();
+                }, 3500);
             });
 
         } else {
@@ -84,25 +111,25 @@
     };
 
     $.fn.imgbox.defaults = {
-        padding             :   10,
-        alignment           :   'auto', // auto OR center
-        allowMultiple       :   true,
-        autoScale           :   true,
-        speedIn             :   500,
-        speedOut            :   500,
-        easingIn            :   'swing',
-        easingOut           :   'swing',
-        zoomOpacity         :   false,
-        overlayShow         :   false,
-        overlayOpacity      :   0.5,
-        hideOnOverlayClick  :   true,
-        hideOnContentClick  :   true
+        padding: 10,
+        alignment: 'auto', // auto OR center
+        allowMultiple: true,
+        autoScale: true,
+        speedIn: 500,
+        speedOut: 500,
+        easingIn: 'swing',
+        easingOut: 'swing',
+        zoomOpacity: false,
+        overlayShow: false,
+        overlayOpacity: 0.5,
+        hideOnOverlayClick: true,
+        hideOnContentClick: true
     };
 
     function zoomIn() {
         busy = true;
 
-        if (opts.allowMultiple == false) {
+        if (opts.allowMultiple === false) {
             $('.imgbox-wrap').remove();
             $('.imgbox-bg-wrap').remove();
 
@@ -116,8 +143,8 @@
 
         $('<div id="imgbox-wrap-' + nr + '" class="imgbox-wrap"></div>')
             .css({
-                'z-index'   :   zindex,
-                'padding'   :   opts.padding
+                'z-index': zindex,
+                'padding': opts.padding
             })
             .append('<img class="imgbox-img" id="imgbox-img-' + nr + '" src="' + preloader.src + '" alt="' + title + '" />')
             .appendTo('body');
@@ -135,8 +162,8 @@
 
             titleh = $('#imgbox-tmp').outerHeight();
 
-            final_pos.height    += titleh;
-            final_pos.top       -= titleh > margin + shadow ? margin : margin * 0.5;
+            final_pos.height += titleh;
+            final_pos.top -= titleh > margin + shadow ? margin : margin * 0.5;
 
             $('#imgbox-tmp').remove();
             $('#imgbox-wrap-' + nr).append('<div class="imgbox-title">' + title + '</div>');
@@ -146,19 +173,19 @@
             var pos = getThumbPos();
 
             orig_pos = {
-                top     :   pos.top     - opts.padding,
-                left    :   pos.left    - opts.padding,
-                width   :   pos.width,
-                height  :   pos.height
+                top: pos.top - opts.padding,
+                left: pos.left - opts.padding,
+                width: pos.width,
+                height: pos.height
             };
 
             $('#imgbox-wrap-' + nr).css(orig_pos).show();
             $('#imgbox-bg-' + nr).css({
-                top         : orig_pos.top,
-                left        : orig_pos.left,
-                width       : orig_pos.width    + (opts.padding * 2),
-                height      : orig_pos.height   + (opts.padding * 2),
-                'z-index'   : zindex - 1
+                top: orig_pos.top,
+                left: orig_pos.left,
+                width: orig_pos.width + (opts.padding * 2),
+                height: orig_pos.height + (opts.padding * 2),
+                'z-index': zindex - 1
             }).show();
 
             if (opts.zoomOpacity) {
@@ -168,68 +195,68 @@
             fx.prop = 0;
 
             $(fx).animate({ prop: 1 }, {
-                 duration   : opts.speedIn,
-                 easing     : opts.easingIn,
-                 step       : draw,
-                 complete   : _finish
+                duration: opts.speedIn,
+                easing: opts.easingIn,
+                step: draw,
+                complete: _finish
             });
 
         } else {
-            $('#imgbox-img-' + nr ).css('height', (final_pos.height - titleh) + 'px');
-            $('#imgbox-wrap-' + nr).css(final_pos).fadeIn('normal',  _finish );
-    
+            $('#imgbox-img-' + nr).css('height', (final_pos.height - titleh) + 'px');
+            $('#imgbox-wrap-' + nr).css(final_pos).fadeIn('normal', _finish);
+
             $('#imgbox-bg-' + nr).css({
-                top         : final_pos.top,
-                left        : final_pos.left,
-                width       : final_pos.width   + (opts.padding * 2),
-                height      : final_pos.height  + (opts.padding * 2),
-                'z-index'   : zindex - 1
+                top: final_pos.top,
+                left: final_pos.left,
+                width: final_pos.width + (opts.padding * 2),
+                height: final_pos.height + (opts.padding * 2),
+                'z-index': zindex - 1
             }).fadeIn('normal');
         }
-    };
+    }
 
     function draw(pos) {
-        var width   = Math.round(orig_pos.width     + (final_pos.width  - orig_pos.width)   * pos);
-        var height  = Math.round(orig_pos.height    + (final_pos.height - orig_pos.height)  * pos);
+        var width = Math.round(orig_pos.width + (final_pos.width - orig_pos.width) * pos);
+        var height = Math.round(orig_pos.height + (final_pos.height - orig_pos.height) * pos);
 
-        var top     = Math.round(orig_pos.top   + (final_pos.top    - orig_pos.top)     * pos);
-        var left    = Math.round(orig_pos.left  + (final_pos.left   - orig_pos.left)    * pos);
+        var top = Math.round(orig_pos.top + (final_pos.top - orig_pos.top) * pos);
+        var left = Math.round(orig_pos.left + (final_pos.left - orig_pos.left) * pos);
 
         $('#imgbox-wrap-' + nr).css({
-            'width'     : width     + 'px',
-            'height'    : height    + 'px',
-            'top'       : top       + 'px',
-            'left'      : left      + 'px'
+            'width': width + 'px',
+            'height': height + 'px',
+            'top': top + 'px',
+            'left': left + 'px'
         });
 
         $('#imgbox-bg-' + nr).css({
-            'width'     : Math.round(width  + opts.padding * 2 ) + 'px',
-            'height'    : Math.round(height + opts.padding * 2 ) + 'px',
-            'top'       : top   + 'px',
-            'left'      : left  + 'px'
+            'width': Math.round(width + opts.padding * 2) + 'px',
+            'height': Math.round(height + opts.padding * 2) + 'px',
+            'top': top + 'px',
+            'left': left + 'px'
         });
 
-        $('#imgbox-img-' + nr ).css('height',  Math.round( height - ( ( ((height - Math.min(orig_pos.height, final_pos.height)) * 100) / (Math.max(orig_pos.height - final_pos.height, final_pos.height - orig_pos.height) ) * titleh / 100))) + 'px');
+        $('#imgbox-img-' + nr).css('height', Math.round(height - ((((height - Math.min(orig_pos.height, final_pos.height)) * 100) / (Math.max(orig_pos.height - final_pos.height, final_pos.height - orig_pos.height)) * titleh / 100))) + 'px');
 
         if (typeof final_pos.opacity !== 'undefined') {
             var opacity = pos < 0.3 ? 0.3 : pos;
 
             $('#imgbox-wrap-' + nr).css('opacity', opacity);
 
-            if ($.browser.msie == false) {
+            if ($.browser.msie === false) {
                 $('#imgbox-bg-' + nr).css('opacity', opacity);
             }
         }
-    };
+    }
 
     function _finish() {
         if (opts.overlayShow && opts.hideOnOverlayClick) {
-            $('#imgbox-overlay').bind('click', {elem: elem, nr : nr, opts : opts, titleh : titleh}, clickHandler);
+            $('#imgbox-overlay').bind('click', { elem: elem, nr: nr, opts: opts, titleh: titleh }, clickHandler);
         }
 
         $('#imgbox-wrap-' + nr)
             .css('filter', '')
-            .bind('click', {elem: elem, nr : nr, opts : opts, titleh : titleh}, clickHandler)
+            .bind('click', { elem: elem, nr: nr, opts: opts, titleh: titleh }, clickHandler)
             .append('<a href="javascript:;" class="imgbox-close"></a>')
             .children('.imgbox-title')
             .show();
@@ -239,23 +266,23 @@
         }
 
         busy = false;
-    };
+    }
 
     function clickHandler(e) {
         e.stopPropagation();
 
         if (e.target.className == 'imgbox-close' || (e.data.opts.hideOnOverlayClick && e.target.id == 'imgbox-overlay') || (e.data.opts.hideOnContentClick && e.target.className == 'imgbox-img' && ($(this).css('z-index') == zindex || $('.imgbox-img').length == 1))) {
-            elem    = e.data.elem;
-            nr      = e.data.nr;
-            opts    = e.data.opts;
-            titleh  = e.data.titleh;
+            elem = e.data.elem;
+            nr = e.data.nr;
+            opts = e.data.opts;
+            titleh = e.data.titleh;
             zoomOut();
 
         } else if ($(this).css('z-index') < zindex) {
             $(this).next('.imgbox-bg-wrap').css('z-index', ++zindex);
             $(this).css('z-index', ++zindex);
         }
-    };
+    }
 
     function zoomOut() {
         if (busy) {
@@ -272,26 +299,26 @@
             var pos = getThumbPos();
 
             orig_pos = {
-                top     :   pos.top     - opts.padding,
-                left    :   pos.left    - opts.padding,
-                width   :   pos.width,
-                height  :   pos.height
+                top: pos.top - opts.padding,
+                left: pos.left - opts.padding,
+                width: pos.width,
+                height: pos.height
             };
 
-            var pos = $('#imgbox-wrap-' + nr).position();
+            pos = $('#imgbox-wrap-' + nr).position();
 
             final_pos = {
-                top     :   pos.top ,
-                left    :   pos.left,
-                width   :   $('#imgbox-wrap-' + nr).width(),
-                height  :   $('#imgbox-wrap-' + nr).height()
+                top: pos.top,
+                left: pos.left,
+                width: $('#imgbox-wrap-' + nr).width(),
+                height: $('#imgbox-wrap-' + nr).height()
             };
 
             if (opts.zoomOpacity) {
                 final_pos.opacity = 0;
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
                 $('#imgbox-wrap-' + nr).css('z-index', 90);
                 $('#imgbox-bg-' + nr).css('z-index', 90);
             }, opts.speedOut * 0.5);
@@ -299,10 +326,10 @@
             fx.prop = 1;
 
             $(fx).animate({ prop: 0 }, {
-                 duration   : opts.speedIn,
-                 easing     : opts.easingIn,
-                 step       : draw,
-                 complete   : _clean_up
+                duration: opts.speedIn,
+                easing: opts.easingIn,
+                step: draw,
+                complete: _clean_up
             });
 
         } else {
@@ -312,10 +339,10 @@
 
             } else {
                 $('#imgbox-bg-' + nr).fadeOut('fast');
-                $('#imgbox-wrap-' + nr).fadeOut('fast', _clean_up );
+                $('#imgbox-wrap-' + nr).fadeOut('fast', _clean_up);
             }
         }
-    };
+    }
 
     function _clean_up() {
         $('#imgbox-bg-' + nr).stop().remove();
@@ -327,81 +354,84 @@
             $('#imgbox-overlay').unbind().stop().fadeOut(200);
         }
 
-        busy = false;   
-    };
+        busy = false;
+    }
 
     function getZoomTo() {
-        var wiew    = getViewport();
-        var to      = {width : preloader.width, height : preloader.height};
+        var wiew = getViewport();
+        var to = { width: preloader.width, height: preloader.height };
 
-        var horizontal_space    = (opts.padding + shadow + margin ) * 2;
-        var vertical_space      = (opts.padding + shadow + margin ) * 2;
+        var horizontal_space = (opts.padding + shadow + margin) * 2;
+        var vertical_space = (opts.padding + shadow + margin) * 2;
 
         if (opts.autoScale && (to.width > (wiew[0] - horizontal_space) || to.height > (wiew[1] - vertical_space))) {
-            var ratio = Math.min(Math.min( wiew[0] - horizontal_space, to.width) / to.width, Math.min( wiew[1] - vertical_space, to.height) / to.height);
+            var ratio = Math.min(Math.min(wiew[0] - horizontal_space, to.width) / to.width, Math.min(wiew[1] - vertical_space, to.height) / to.height);
 
-            to.width    = Math.round(ratio * to.width);
-            to.height   = Math.round(ratio * to.height);
+            to.width = Math.round(ratio * to.width);
+            to.height = Math.round(ratio * to.height);
         }
 
         if (opts.alignment == 'center') {
-            to.top  = wiew[3] + ((wiew[1] - to.height - opts.padding * 2) * 0.5);
-            to.left = wiew[2] + ((wiew[0] - to.width  - opts.padding * 2) * 0.5);
+            to.top = wiew[3] + ((wiew[1] - to.height - opts.padding * 2) * 0.5);
+            to.left = wiew[2] + ((wiew[0] - to.width - opts.padding * 2) * 0.5);
 
         } else {
             var pos = getThumbPos();
 
-            to.top  = pos.top  - ( ( to.height - pos.height  ) * 0.5) - opts.padding ;
-            to.left = pos.left - ( ( to.width  - pos.width   ) * 0.5) - opts.padding ;
+            to.top = pos.top - ((to.height - pos.height) * 0.5) - opts.padding;
+            to.left = pos.left - ((to.width - pos.width) * 0.5) - opts.padding;
 
-            to.top  = to.top    > wiew[3] + margin + shadow ? to.top    :  wiew[3] + margin + shadow; 
-            to.left = to.left   > wiew[2] + margin + shadow ? to.left   :  wiew[2] + margin + shadow;
+            to.top = to.top > wiew[3] + margin + shadow ? to.top : wiew[3] + margin + shadow;
+            to.left = to.left > wiew[2] + margin + shadow ? to.left : wiew[2] + margin + shadow;
 
-            to.top  = to.top    > wiew[1] + wiew[3] - ( to.height   + vertical_space )  ? wiew[1] + wiew[3] - ( to.height   + ( margin  + shadow + opts.padding * 2 ) ) : to.top;
-            to.left = to.left   > wiew[0] + wiew[2] - ( to.width    + horizontal_space )    ? wiew[0] + wiew[2] - ( to.width    + ( margin  + shadow + opts.padding * 2 ) ) : to.left;
+            to.top = to.top > wiew[1] + wiew[3] - (to.height + vertical_space) ? wiew[1] + wiew[3] - (to.height + (margin + shadow + opts.padding * 2)) : to.top;
+            to.left = to.left > wiew[0] + wiew[2] - (to.width + horizontal_space) ? wiew[0] + wiew[2] - (to.width + (margin + shadow + opts.padding * 2)) : to.left;
         }
 
-        if ( opts.autoScale == false ) {
-            to.top  = to.top    > wiew[3] + shadow + margin ? to.top    :  wiew[3] + shadow + margin;
-            to.left = to.left   > wiew[2] + shadow + margin ? to.left   :  wiew[2] + shadow + margin;
+        if (opts.autoScale === false) {
+            to.top = to.top > wiew[3] + shadow + margin ? to.top : wiew[3] + shadow + margin;
+            to.left = to.left > wiew[2] + shadow + margin ? to.left : wiew[2] + shadow + margin;
         }
 
-        to.top  = parseInt(to.top);
+        to.top = parseInt(to.top);
         to.left = parseInt(to.left);
 
         return to;
-    };
+    }
 
     function getViewport() {
-        return [ $(window).width(), $(window).height(), $(document).scrollLeft(), $(document).scrollTop() ];
-    };
+        return [$(window).width(), $(window).height(), $(document).scrollLeft(), $(document).scrollTop()];
+    }
 
     function getThumbPos() {
-        var thumb   = $(elem).find('img').eq(0);
-        var pos     = thumb.offset();
+        var thumb = $(elem).find('img').eq(0);
+        var pos = thumb.offset();
 
-        pos.top     += parseFloat( thumb.css('paddingTop') );
-        pos.left    += parseFloat( thumb.css('paddingLeft') );
+        pos.top += parseFloat(thumb.css('paddingTop'));
+        pos.left += parseFloat(thumb.css('paddingLeft'));
 
-        pos.top     += parseFloat( thumb.css('border-top-width') );
-        pos.left    += parseFloat( thumb.css('border-left-width') );
+        pos.top += parseFloat(thumb.css('border-top-width'));
+        pos.left += parseFloat(thumb.css('border-left-width'));
 
-        pos.width   = thumb.width();
-        pos.height  = thumb.height();
+        pos.width = thumb.width();
+        pos.height = thumb.height();
 
         return pos;
-    };
+    }
 
     function showActivity() {
-        var pos = getThumbPos( elem );
+        var pos = getThumbPos(elem);
 
         $('#imgbox-loading').css(pos).show();
-    };
+    }
 
     function hideActivity() {
         $(preloader).unbind();
         $('#imgbox-loading').hide();
-    };
+        clearInterval(timer1);
+        $('#imgbox-loading .ld-left div')[0].style.transform = 'rotateZ(-180deg)';
+        $('#imgbox-loading .ld-right div')[0].style.transform = 'rotateZ(-178deg)';
+    }
 
     function cancelLoading() {
         hideActivity();
@@ -409,18 +439,18 @@
         if (opts.overlayShow) {
             $('#imgbox-overlay').unbind().stop().fadeOut(200);
         }
-    };
+    }
 
     function init() {
-        $('<div id="imgbox-loading" title="正在加载照片，单击停止"><div></div></div><div id="imgbox-overlay"></div>').appendTo('body');
+        $('<div id="imgbox-loading" title="正在加载照片，单击停止"><div class="ld-left"><div></div></div><div class="ld-right"><div></div></div><div class="ld-progress"><span>■</span><div></div></div></div><div id="imgbox-overlay"></div>').appendTo('body');
 
         $('#imgbox-loading')
-            .click(cancelLoading)
-            .find('div')
-            .css('opacity', 0.4);
-    };
+            .click(cancelLoading);
+        // .find('div')
+        // .css('opacity', 1.0);
+    }
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         init();
     });
 
