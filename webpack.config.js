@@ -11,6 +11,7 @@ let config = {
         index: [
             './js/index.js'
             ,'./js/media.js'
+            ,'./js/heart.js'
             ,'./js/import-css.js'
             ,'./js/jquery.imgbox.js'
         ]
